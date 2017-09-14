@@ -1,10 +1,9 @@
 from telebot import types
-import config
-
 
 
 def generate_markup(right_answer, wrong_answers):
-    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    markup = types.ReplyKeyboardMarkup(
+        one_time_keyboard=True, resize_keyboard=True)
     all_answers = '{},{}'.format(right_answer, wrong_answers)
     list_items = []
 
@@ -15,6 +14,5 @@ def generate_markup(right_answer, wrong_answers):
 
     for item in list_items:
         markup.add(item)
-        
-    return markup
 
+    return markup
