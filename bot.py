@@ -1,26 +1,45 @@
-import config
 import telebot
-
+import config
+import sqlite
+import random
+from telebot import types
+import utils
+import storage
 
 bot = telebot.TeleBot(config.token)
 
 
+@bot.message_handler(commands=["start"])
+def start_game(message):
+    db = sqlite.create_connection(config.database_path)
+    rows = sqlite.count_rows(db)
+    row = sqlite.select_single(db, random.randint(1, rows))
+
+    storage.set_chat_id(message.chat.id, row[2])
+
+    markup = utils.generate_markup(row[2], row[3])
+
+    msg = bot.send_voice(message.chat.id, row[
+                         1], reply_markup=markup, duration=20)
+
+    sqlite.close(db)
+
+
 @bot.message_handler(content_types=["text"])
-def repeat_all_messages(message):
-    bot.send_message(message.chat.id, 'Hi!')
+def check_answer(message):
 
+    answer = storage.get_chat_id(message.chat.id)
+    keyboard_hidden = types.ReplyKeyboardRemove()
 
-@bot.message_handler(commands=['test'])
-def find_file_ids(message):
-    for file in os.listdir('music/'):
-        if file.split('.')[-1] == 'ogg':
-            f = open('music/' + file, 'rb')
-            msg = bot.send_voice(message.chat.id, f, None)
-            # А теперь отправим вслед за файлом его file_id
-            bot.send_message(message.chat.id, msg.voice.file_id,
-                             reply_to_message_id=msg.message_id)
-        time.sleep(3)
+    if answer == message.text:
+        bot.send_message(message.chat.id, 'Верно!',
+                         reply_markup=keyboard_hidden)
+    else:
+        bot.send_message(message.chat.id, 'Увы, вы ошиблись!',
+                         reply_markup=keyboard_hidden)
+        storage.remove_chat_id(message.chat.id)
 
 
 if __name__ == '__main__':
-    bot.polling(none_stop=True)
+    random.seed()
+    bot.polling(none_stop=True, interval=0, timeout=20)
