@@ -18,12 +18,7 @@ def select_single(conn, id):
 	cursor = conn.cursor()
 	with conn:
 		return cursor.execute('SELECT * FROM music WHERE id = ?', (id, )).fetchall()[0]
-
-def update_sigle(conn, key, id):
-	cursor = conn.cursor()
-	with conn:
-		print(cursor.execute('UPDATE music SET chat_id = ? WHERE id = ?', (key, id, )).fetchall())
-		# return cursor.execute('UPDATE music SET chat_id = ? WHERE id = ?', (key, id, )).fetchall()
+		
 
 def count_rows(conn):
 	cursor = conn.cursor()
